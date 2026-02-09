@@ -5,7 +5,7 @@
 This repository contains the research project and analysis for a study examining the literary contributions and recognition of women poets during Imperial China.
 
 ### Author
-Liu, Weifeng
+Liu, Felix
 
 ### Project Overview
 This research explores how women poets navigated and claimed literary recognition within the male-dominated literary landscape of Imperial China, examining their strategies, networks, and the margins in which they developed their craft.
