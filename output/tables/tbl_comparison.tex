@@ -1,0 +1,17 @@
+\begin{table}
+\centering
+\caption{\label{tab:tbl_comparison}Comparison of LASSO Treatment Effects}
+\centering
+\begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{10em}>{\raggedright\arraybackslash}p{10em}>{\raggedright\arraybackslash}p{10em}}
+\toprule
+\textbf{Network Type} & \textbf{Naive LASSO} & \textbf{Double LASSO}\\
+\midrule
+\textbf{Social Degree} & 0.223 & 0.211\\
+\textbf{Kinship Degree} & 0.102 & 0.000\\
+\bottomrule
+\multicolumn{3}{l}{\rule{0pt}{1em}\textit{Note: }}\\
+\multicolumn{3}{l}{\rule{0pt}{1em}Estimates from LASSO regressions using gamlr package.}\\
+\multicolumn{3}{l}{\rule{0pt}{1em}\textsuperscript{1} Treatment variables (d and dhat) were not penalized in the estimation.}\\
+\multicolumn{3}{l}{\rule{0pt}{1em}\textsuperscript{2} Controls include dynasty, region, and status variables.}\\
+\end{tabu}
+\end{table}
