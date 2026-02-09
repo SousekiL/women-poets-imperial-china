@@ -1,0 +1,26 @@
+project:
+  type: default
+  output-dir: output
+
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    code-block-bg: "#f1f3f5"
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    theme: default
+    css: style/custom.css
+
+bibliography: style/womenreference.bib
+biblio-style: apa
+link-citations: true
+
+crossref:
+  fig-title: "Figure"
+  tbl-title: "Table"
+  fig-prefix: "Figure"
+  tbl-prefix: "Table"
+  labels: arabic
+  ref-hyperlink: true

@@ -2,88 +2,33 @@
 title: "Growing in the Margins of Men's Narration"
 subtitle: "How Women Poets Claimed Literary Recognition in Imperial China"
 author: "Liu, Felix"
-nocite: '@*'    
-link-citations: true 
-crossref:
-  fig-title: "Figure"
-  tbl-title: "Table"
-  fig-prefix: "Figure"
-  tbl-prefix: "Table"
-  labels: arabic         
-  ref-hyperlink: true    
-format:
-  html:
-    pdf-engine: xelatex
-    biblio-style: apa
-    bibliography: style/womenreference.bib  
-    keep-tex: true 
-    reference-order: appearance  
-    documentclass: article 
-    papersize: letter
-    geometry: margin=1in
-    mainfont: "Charter"
-    fontsize: 11pt
-    # fig-pos: "H"
-    # tbl-pos: "H"
-    CJKmainfont: "STSong"
-    toc: true
-    toc-depth: 2
-    number-sections: false
-    code-block-bg: "#f1f3f5"
-    fig-cap-location: bottom
-    tbl-cap-location: top
+nocite: '@*'
 ---
-
-\counterwithin{figure}{section}
-\counterwithin{table}{section}
-\setcounter{tocdepth}{3} 
-\setcounter{secnumdepth}{3} 
-\renewcommand{\thesection}{\arabic{section}} 
-\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}} \renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-\setstretch{1.5} 
-\lstset{
-            basicstyle=\linespread{1.0}\ttfamily, 
-            columns=fullflexible
-          }
-\pagenumbering{gobble}
-
-```{=html}
-<style>
-  body {
-  text-align: justify}
-</style>
-```
-
 
 ```{r setup}
 #| include: FALSE
 #| warning: false
 #| message: false
 
-knitr::opts_chunk$set(echo = FALSE, 
-                      #include = TRUE, 
+knitr::opts_chunk$set(echo = FALSE,
                       fig.width = 12, fig.height = 9,
                       warning = FALSE,
                       message = FALSE,
                       cache = TRUE,
                       digits = 3,
-                      width = 48) 
+                      width = 48)
 
 #-------------------------------
-# load hanzi font
+# Configurable paths
+# Set these environment variables or edit the defaults below
 #-------------------------------
-source("r/_theme.R")
-source("r/_networks_degree.R")
-library(showtext)
-## Add the font with the corresponding font faces
-font_add("Canger", "/Library/Fonts/仓耳今楷01-W04.ttf")
-font_families()
-showtext_auto()  
+CBDB_DB_PATH   <- Sys.getenv("CBDB_DB_PATH",   unset = "data/cbdb.db")
+MQWW_POEM_PATH <- Sys.getenv("MQWW_POEM_PATH", unset = "data/mqww_poem.csv")
+CANGER_FONT    <- Sys.getenv("CANGER_FONT",    unset = "")
 
 #-------------------------------
-# load packages
+# Load packages
 #-------------------------------
-
 library(DBI)
 library(RSQLite)
 library(ggplot2)
@@ -91,23 +36,31 @@ library(dplyr)
 library(tidyverse)
 library(magrittr)
 library(kableExtra)
-
 library(data.table)
-library(magrittr)
-library(tidyverse)
-library(dplyr)
-
 library(gridExtra)
 library(grid)
-
 library(igraph)
 library(ggraph)
+library(showtext)
+
+#-------------------------------
+# Load helper scripts
+#-------------------------------
+source("r/_theme.R")
+source("r/_networks_degree.R")
+
+#-------------------------------
+# Load CJK font (if available)
+#-------------------------------
+if (nzchar(CANGER_FONT) && file.exists(CANGER_FONT)) {
+  font_add("Canger", CANGER_FONT)
+}
+showtext_auto()
 ```
 
 
 A preprint version of this manuscript is available at [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5072945)
 
-\pagenumbering{arabic}
 
 # Introduction
 
@@ -155,7 +108,7 @@ In sum, social capital theory offers a powerful framework for analyzing how wome
 # load the datatable
 #-------------------------------
 
-filename <- '/Users/sousekilyu/Documents/Meta Data/CBDB/cbdb202409.db'
+filename <- CBDB_DB_PATH
 sqlite.driver <- dbDriver("SQLite")
 db <- dbConnect(sqlite.driver,
                 dbname = filename)
@@ -172,7 +125,7 @@ source("r/_cbdb_networks.R")
 #| include: false
 
 ###
-df.poem.poet.info <- fread('/Users/sousekilyu/Documents/Meta Data/CBDB/mqww/cycle/poem.csv') %>%
+df.poem.poet.info <- fread(MQWW_POEM_PATH) %>%
   left_join(df.poem.poet, join_by(poemID == poemID)) %>%
   left_join(df.poem.work, join_by(poemID == poemID)) %>%
   left_join(df.work, join_by(workID == workID)) %>%
@@ -1896,8 +1849,6 @@ The results also engage with Granovetter’s (1973) theory of the strength of we
 
 This study reveals that women poets in imperial China managed professional risk not by relying solely on family prestige, but by strategically expanding their social networks beyond the home. This insight not only deepens our understanding of how gendered agents operated within elite cultural spaces, but also extends the relevance of social capital theory to non-Western, historical, and patriarchal contexts.
 
-
-\pagebreak
 
 # References {.unnumbered}
 

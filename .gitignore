@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Quarto render output
+*_cache/
+*_files/
+*.html
+!README.html
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Generated output (can be reproduced by rendering)
+output/images/*.tiff
+output/images/*.png
+!output/images/structure.png
+!output/images/structure.jpg
+
+# Local database files (too large for git)
+*.db
+
+# Environment / IDE
+.vscode/
+.Rproj
