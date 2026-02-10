@@ -34,6 +34,11 @@ This research explores how women poets navigated and claimed literary recognitio
 - `Literature_Html_for_Github.qmd` - Literature review document
 - `style/womenreference.bib` - Bibliography database
 
+### Summaries
+
+- [English Summary](SUMMARY_EN.md)
+- [中文摘要](SUMMARY_CH.md)
+
 ### Requirements
 - R (4.0+)
 - Quarto
