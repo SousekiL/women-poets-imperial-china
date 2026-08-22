@@ -228,10 +228,18 @@ cd /Users/sousekilyu/Documents/Github/women-poets-imperial-china
 
 说明：端口 8765/8766 已被其他服务占用或启动上下文不正确，因此使用 8877 完成验证。浏览器交互和 Canvas 视觉效果尚未完成端到端人工验收。
 
-GitHub Pages 已启用，来源为 `main` 分支根目录，当前配置返回：
+GitHub Pages 已启用，来源为 `main` 分支根目录；本次推送后已确认状态为 `built`。线上验证返回 HTTP 200：
 
 ```text
 https://sousekil.github.io/women-poets-imperial-china/
+```
+
+已验证线上资源：
+
+```text
+index.html
+assets/app.js
+data/derived/network/network_nodes.csv
 ```
 
 ## 5. 当前工作区与 Git 状态
