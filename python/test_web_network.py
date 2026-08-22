@@ -33,6 +33,13 @@ class WebNetworkBuildTest(unittest.TestCase):
             self.assertEqual(len(core["works"]), expected["works"])
             self.assertEqual(core["people_fields"][0], "id")
             self.assertEqual(core["direct_fields"][1:3], ["a", "b"])
+            people = {row[0] for row in core["people"]}
+            work_ids = {row[0] for row in core["works"]}
+            self.assertTrue(core["authors"])
+            for author in core["authors"]:
+                self.assertIn(author["id"], people)
+                self.assertTrue(author["works"])
+                self.assertTrue(set(author["works"]).issubset(work_ids))
             self.assertEqual(sum(item["edges"] for item in manifest["works"].values()), expected["work_edges"])
             for work_id, item in manifest["works"].items():
                 shard = json.loads((out / item["file"]).read_text(encoding="utf-8"))
