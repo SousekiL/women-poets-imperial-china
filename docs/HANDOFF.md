@@ -21,6 +21,16 @@
 
 ## 2. 计划路线
 
+### 当前状态摘要（2026-08-22）
+
+- 关系 code、方向、籍贯口径审计：已完成，见 `research-validity/01-codebook-semantics`。
+- KIN/ASSOC 规范化分层网络：已完成并集成主 worktree；KIN typed-undirected 318,397，ASSOC typed-undirected 84,233。
+- KIN/ASSOC 中心性 v2：已完成；typed degree、投影路径指标和无向 k-core 分开记录。
+- 稳健性审查：B3 输入计数差异已解决；B1 路径采样不稳定、B2 来源/年份缺失、B4 strength 命名边界仍限制强历史解释。
+- 证据卡：KIN/ASSOC 首轮 15 张、作品层第二轮 13 张已完成，raw/edge 追溯资产已保存。
+- 作品层中心性：已完成；`work_direct` 3,242 边、`work_via_poem` 87,874 边；via 层 3,999 首无作者诗作为限制记录。
+- 人工匹配验证：`02-human-validation` 已启动但尚未产生人工金标准；L3 仍等待评价口径。
+
 ### 阶段 A：资料审计与安全边界（已完成）
 
 1. 确认实际数据位置、文件版本、大小和重复副本。

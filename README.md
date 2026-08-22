@@ -16,7 +16,7 @@ GitHub Pages：<https://sousekil.github.io/women-poets-imperial-china/>
 - `docs/data_dictionary.md`：数据字典；
 - `docs/matching_method.md`：人名匹配方法；
 - `docs/HANDOFF.md`：完整项目交接文档、验证结果和后续 TODO；
-- `backup/legacy-research/`：本项目此前的论文、R 分析、旧输出和旧摘要归档。
+- `backup/legacy-research/`：本地旧研究归档；不属于公开发布内容。
 
 ## 本地运行
 
@@ -30,10 +30,10 @@ python3 -m http.server 8877
 
 然后打开 <http://127.0.0.1:8877/>。
 
-默认脚本读取本机外部原始资料：
+脚本读取仓库外部的原始资料目录；当前本机开发路径只记录在项目文档中，公开 clone 需按 `data/README.md` 配置等价的本地资料副本：
 
 ```text
-/Users/sousekilyu/Documents/Data/biography_literature_CBDB_china_historical/
+<外部 CBDB/MQWW 数据目录>
 ```
 
 原始 CBDB SQLite、MQWW Access 和全量原始 CSV 不在本仓库中，也不应上传到 public GitHub。脚本以 SQLite read-only URI 和 `PRAGMA query_only=ON` 读取 CBDB。
@@ -48,5 +48,7 @@ python3 -m http.server 8877
 
 ## 数据来源
 
-- CBDB：<https://cbdb.hsites.harvard.edu/download-cbdb-standalone-database>
-- MQWW：<https://digital.library.mcgill.ca/mingqing/>
+- CBDB 2024-09：Harvard University、Academia Sinica 与 Peking University, China Biographical Database (CBDB). <https://cbdb.hsites.harvard.edu/>
+- MQWW 2023：McGill University Library / Academia Sinica, Ming Qing Women's Writings. <https://mhdb.mh.sinica.edu.tw/mingqing/mqww/>
+
+项目自有代码和文档以 [MIT License](LICENSE) 发布；CBDB、MQWW 与派生数据仍受各自来源条款和署名要求约束。

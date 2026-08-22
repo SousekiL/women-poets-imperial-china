@@ -31,6 +31,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from network_normalized import export as export_normalized
+
 REPO = Path(__file__).resolve().parents[1]
 DERIVED = REPO / "data" / "derived"
 NET_OUT = DERIVED / "network"
@@ -312,6 +314,80 @@ def build_work_data():
     return work_nodes, edges
 
 
+UNKNOWN_ASSOC_CODES = {588,589,590,591,592,593,596,597,598,599,600,614,615,630,631,633,634,635,636,637,638,641,642,643,644,650,651,654,655}
+
+
+def _ids_clause(ids):
+    return ",".join("?" * len(ids)), sorted(ids)
+
+
+def _norm_direction(kind, src, tgt, code, code_meta):
+    """Return semantic direction without treating recorded mirrors as evidence."""
+    if kind == "assoc":
+        role = (code_meta.get(str(code), (None, None, None))[2] or "").upper()
+        if role == "A": return src, tgt, "directed"
+        if role == "P": return tgt, src, "directed"
+        if role == "M": return min(src, tgt), max(src, tgt), "undirected"
+        return src, tgt, "unknown"
+    meta = code_meta.get(str(code), {})
+    # step columns are the documented semantic orientation helpers.
+    if meta.get("upstep", 0) > 0: return tgt, src, "directed"
+    if meta.get("dwnstep", 0) > 0: return src, tgt, "directed"
+    if meta.get("marstep", 0) > 0: return min(src, tgt), max(src, tgt), "undirected"
+    return src, tgt, "recorded"
+
+
+    # Legacy layered exporter removed; v2 exporter is authoritative.
+    """Export raw incident records and mirror-collapsed analysis edges."""
+    NET_OUT.mkdir(parents=True, exist_ok=True)
+    ph, ids = _ids_clause(a_ids)
+    kin_codes = {}
+    for r in conn.execute("SELECT c_kincode,c_kin_pair1,c_kin_pair2,c_upstep,c_dwnstep,c_marstep,c_kinrel_chn FROM KINSHIP_CODES"):
+        kin_codes[str(r[0])] = {"pair1": r[1], "pair2": r[2], "upstep": r[3] or 0, "dwnstep": r[4] or 0, "marstep": r[5] or 0, "label": r[6] or ""}
+    assoc_codes = {}
+    for r in conn.execute("SELECT c_assoc_code,c_assoc_pair,c_assoc_desc_chn,c_assoc_role_type FROM ASSOC_CODES"):
+        assoc_codes[str(r[0])] = (r[1], r[2] or "", r[3] or "")
+    types = {int(r[0]): str(r[1]) for r in conn.execute("SELECT c_assoc_code,GROUP_CONCAT(c_assoc_type_id) FROM ASSOC_CODE_TYPE_REL GROUP BY c_assoc_code")}
+
+    specs = {
+      "kin": ("KIN_DATA", "c_personid", "c_kin_id", "c_kin_code", "c_source", "", kin_codes),
+      "assoc": ("ASSOC_DATA", "c_personid", "c_assoc_id", "c_assoc_code", "c_source", "c_assoc_year", assoc_codes),
+    }
+    manifest = {"schema_version":"normalized-network-v1", "command":"python3 python/build_network_derived.py", "match_scope":"A-only incident records", "layers":{}, "limitations":["Mirror rows are collapsed, not independent evidence.","KIN direction without step metadata remains recorded/unknown.","Address sequence was not used; no silent primary-address selection."]}
+    for kind, (table, scol, tcol, ccol, sourcecol, yearcol, code_meta) in specs.items():
+        cols = [scol,tcol,ccol,sourcecol] + ([yearcol] if yearcol else [])
+        sql = f"SELECT {','.join(cols)} FROM {table} WHERE {scol} IN ({ph}) OR {tcol} IN ({ph})"
+        rows = []
+        for row in conn.execute(sql, ids + ids):
+            src,tgt,code = str(row[0]),str(row[1]),int(row[2])
+            if src == tgt or (kind == "assoc" and code == 0): continue
+            source = "" if row[3] is None else str(row[3]); year = "" if not yearcol or row[4] is None else str(row[4])
+            sem_src, sem_tgt, dir_kind = _norm_direction(kind,src,tgt,code,code_meta)
+            if kind == "assoc":
+                label = code_meta.get(str(code),(None,"", ""))[1]; role = code_meta.get(str(code),(None,"", ""))[2]; typ = types.get(code,"unknown")
+            else: label = code_meta.get(str(code),{}).get("label",""); role=""; typ=""
+            match = "A" if src in a_ids else (baseline.get(a_poet_map.get(tgt,""),{}).get("level","") if tgt in a_ids else "")
+            rows.append({"record_id":f"{kind}:{len(rows)}","source_id":src,"target_id":tgt,"relation_code":str(code),"relation_label":label,"recorded_source":src,"recorded_target":tgt,"semantic_source":sem_src,"semantic_target":sem_tgt,"direction":dir_kind,"role_type":role,"type_rel":typ,"source_id_ref":source,"year":year,"year_precision":"exact" if year and year not in ("0","-1") else "unknown","match_level":match,"derivation":"raw_incident_A","dedup_key":f"{kind}:{min(src,tgt)}:{max(src,tgt)}","raw_record_count":"1","mirror_merged":"0"})
+        raw_cols = list(rows[0]) if rows else ["record_id","source_id","target_id"]
+        write_csv(NET_OUT / f"{kind}_edges_raw.csv", rows, raw_cols)
+        groups = {}
+        for r in rows:
+            groups.setdefault(r["dedup_key"], []).append(r)
+        norm=[]
+        for key, members in groups.items():
+            # Choose semantic orientation only when all evidence agrees; never silently pick a sequence.
+            orientations={(m["semantic_source"],m["semantic_target"],m["direction"]) for m in members}
+            first=members[0]; orientation=next(iter(orientations)) if len(orientations)==1 else ("","","mixed")
+            out=dict(first); out.update({"edge_id":f"{kind}_n_{len(norm)}","source_id":orientation[0],"target_id":orientation[1],"direction":orientation[2],"relation_code":";".join(sorted({m["relation_code"] for m in members})),"source_id_ref":";".join(sorted({m["source_id_ref"] for m in members if m["source_id_ref"]})),"year":";".join(sorted({m["year"] for m in members if m["year"]})),"raw_record_count":str(len(members)),"mirror_merged":"1" if len(members)>1 else "0","derivation":"mirror_collapsed"})
+            norm.append(out)
+        write_csv(NET_OUT / f"{kind}_edges_normalized.csv", norm, raw_cols + ["edge_id"] if "edge_id" not in raw_cols else raw_cols)
+        manifest["layers"][kind]={"raw_rows":len(rows),"normalized_edges":len(norm),"self_loops_removed":sum(1 for _ in conn.execute(f"SELECT 1 FROM {table} WHERE {scol}={tcol} AND ({scol} IN ({ph}) OR {tcol} IN ({ph}))",ids+ids)),"code_0_removed":sum(1 for m in rows if kind=="assoc" and m["relation_code"]=="0"),"unknown_type_rows":sum(1 for m in rows if kind=="assoc" and m["type_rel"]=="unknown"),"schema":raw_cols}
+    import hashlib, json
+    for p in NET_OUT.glob("*_edges_*.csv"):
+        manifest.setdefault("files",{})[p.name]={"rows":sum(1 for _ in open(p,encoding="utf-8-sig"))-1,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()}
+    (NET_OUT / "manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--limit", type=int, default=0,
@@ -333,6 +409,11 @@ def main(argv=None) -> int:
     conn = connect_cbdb()
     try:
         kin, assoc = load_code_tables(conn)
+        export_normalized(conn, NET_OUT, a_persons, (
+            "/Users/sousekilyu/.traycer/epics/046a4d0b-e49d-4d5f-b3c3-0f2ccb55058d/artifacts/research-validity/01-codebook-semantics/kinship_codebook_v1.csv",
+            "/Users/sousekilyu/.traycer/epics/046a4d0b-e49d-4d5f-b3c3-0f2ccb55058d/artifacts/research-validity/01-codebook-semantics/assoc_codebook_v1.csv",
+            "/Users/sousekilyu/.traycer/epics/046a4d0b-e49d-4d5f-b3c3-0f2ccb55058d/artifacts/research-validity/01-codebook-semantics/addr_type_codebook_v1.csv",
+        ))
         edges = build_direct_edges(conn, a_persons, kin, assoc, a_poet_map)
         related_ids = {e["source_node_id"][5:] for e in edges}
         related_ids |= {e["target_node_id"][5:] for e in edges}
