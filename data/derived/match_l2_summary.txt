@@ -1,0 +1,12 @@
+MQWW -> CBDB L2 别名召回摘要（只读）
+records=7751
+unique_alias_values=5998
+alias_values_with_hits=4548
+candidate_records=470
+existing_l1_match=6141
+no_alias_match=228
+no_alias_value=768
+review_multi_candidate=344
+review_unique_female=49
+review_unique_nonfemale=77
+skip_l0=144

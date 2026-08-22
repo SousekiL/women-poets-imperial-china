@@ -1,57 +1,52 @@
-# Women Poets in Imperial China
+# MQWW × CBDB 女性人物与作品关系网络
 
-## Growing in the Margins of Men's Narration: How Women Poets Claimed Literary Recognition in Imperial China
+本项目以 MQWW（明清妇女著作）女性人物为主体，尝试匹配 CBDB 人物 ID，提取亲缘与社会关系，并以作品为入口探索女性人物之间的分层关系网络。
 
-This repository contains the research project and analysis for a study examining the literary contributions and recognition of women poets during Imperial China.
+## 在线网站
 
-### Author
-Liu, Felix
+GitHub Pages：<https://sousekil.github.io/women-poets-imperial-china/>
 
-### Project Overview
-This research explores how women poets navigated and claimed literary recognition within the male-dominated literary landscape of Imperial China, examining their strategies, networks, and the margins in which they developed their craft.
+如果页面刚刚更新，GitHub Pages 可能需要几分钟完成部署。
 
-### Project Structure
+## 当前内容
 
-```
-.
-├── data/              # Research data and datasets
-├── r/                 # R scripts for analysis
-├── output/            # Generated outputs and results
-├── style/             # Bibliography and style files
-├── ASRM539_Final_for_DSH.qmd           # Main paper (Quarto format)
-├── Literature_Html_for_Github.qmd      # Literature review (HTML format)
-└── ASRM539_Final.tex                   # LaTeX compiled version
-```
+- `index.html` + `assets/`：静态网站 MVP；
+- `data/derived/`：不含原始数据库的派生匹配和网络数据；
+- `python/`：只读数据处理脚本和测试；
+- `docs/data_dictionary.md`：数据字典；
+- `docs/matching_method.md`：人名匹配方法；
+- `docs/HANDOFF.md`：完整项目交接文档、验证结果和后续 TODO；
+- `backup/legacy-research/`：本项目此前的论文、R 分析、旧输出和旧摘要归档。
 
-### Technologies Used
-- **Quarto**: For reproducible research documents
-- **R**: For data analysis and visualization
-- **LaTeX/XeLaTeX**: For PDF generation with CJK font support
-- **Bibliographic Management**: BibTeX format
+## 本地运行
 
-### Key Files
-- `ASRM539_Final_for_DSH.qmd` - Main research paper in Quarto format
-- `Literature_Html_for_Github.qmd` - Literature review document
-- `style/womenreference.bib` - Bibliography database
-
-### Summaries
-
-- [English Summary](SUMMARY_EN.md)
-- [中文摘要](SUMMARY_CH.md)
-
-### Requirements
-- R (4.0+)
-- Quarto
-- XeLaTeX (for PDF generation)
-- CJK fonts (STSong, Charter)
-
-### Rendering the Document
 ```bash
-quarto render ASRM539_Final_for_DSH.qmd
+python3 python/match_mqww_cbdb.py
+python3 python/match_mqww_cbdb_l2.py
+python3 python/build_network_derived.py
+PYTHONPATH=python python3 -m unittest discover -s python -p 'test_*.py' -v
+python3 -m http.server 8877
 ```
 
-### License
-This research is part of the ASRM539 course project.
+然后打开 <http://127.0.0.1:8877/>。
 
-### Contact
-For questions or collaboration opportunities, please open an issue in this repository.
+默认脚本读取本机外部原始资料：
+
+```text
+/Users/sousekilyu/Documents/Data/biography_literature_CBDB_china_historical/
+```
+
+原始 CBDB SQLite、MQWW Access 和全量原始 CSV 不在本仓库中，也不应上传到 public GitHub。脚本以 SQLite read-only URI 和 `PRAGMA query_only=ON` 读取 CBDB。
+
+## 研究口径
+
+- 姓名相同不是同一人物的充分证据；后续连接使用 `poetID` / `c_personid`；
+- CBDB 亲缘/社会关系、MQWW 直接作品关系、作品—诗作—人物传递关系分层显示；
+- 共同收录不等于现实社会关系；
+- 网络中心度表示数据库记录中的连接结构，不直接等同于历史影响力；
+- 匹配候选、来源记录、置信度和推导规则应保留，以便复核。
+
+## 数据来源
+
+- CBDB：<https://cbdb.hsites.harvard.edu/download-cbdb-standalone-database>
+- MQWW：<https://digital.library.mcgill.ca/mingqing/>

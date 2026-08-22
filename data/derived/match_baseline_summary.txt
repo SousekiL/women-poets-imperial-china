@@ -1,0 +1,14 @@
+MQWW -> CBDB L0/L1 匹配基线（只读审计，2026-08-22）
+CBDB: /Users/sousekilyu/Documents/Data/biography_literature_CBDB_china_historical/cbdb202409.db
+MQWW poet: /Users/sousekilyu/Documents/Data/biography_literature_CBDB_china_historical/mqww_mingqing_women_writings/cycle/poet.csv
+----------------------------------------
+CBDB BIOG_MAIN 总行数:      641568
+CBDB 女性行数 (c_female=1): 55889
+MQWW 诗人记录数:            7751
+MQWW 唯一 NameHZ:           7612
+L0 泛称/无名排除 (C):       144
+L1 精确命中 (A+B):          6141  (79.2%)
+  其中 A 级 (唯一女性):     3140
+  B 级 (待消歧/复核):       3001
+  女性标记命中 (A+B 中):    4295  (55.4%)
+未命中 (D):                 1466

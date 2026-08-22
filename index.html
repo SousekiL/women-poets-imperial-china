@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>明清女性诗人与作品网络</title><link rel="stylesheet" href="assets/style.css"></head>
+<body>
+<header><div><span class="eyebrow">MQWW · CBDB</span><h1>明清女性诗人与作品关系图谱</h1><p>女性人物、作品与可追溯关系的探索性视图</p></div><div class="stats"><b id="people-count">–</b> 人物 <b id="work-count">–</b> 作品 <b id="edge-count">–</b> 关系</div></header>
+<section class="controls"><label>搜索人物 <input id="search" type="search" placeholder="姓名或 MQWW ID"></label><label>选择作品 <select id="work-select"><option value="">全部作品</option></select></label><label>关系层 <select id="layer-select"><option value="all">全部层</option><option value="direct">CBDB 直接关系</option><option value="work">共同作品 / 诗作</option></select></label><button id="reset">重置</button></section>
+<main><section class="graph-wrap"><canvas id="graph" aria-label="人物关系图谱"></canvas><div id="loading">正在加载派生数据…</div><div class="legend"><span><i class="person"></i>人物</span><span><i class="work"></i>作品</span><span><i class="direct"></i>CBDB直接关系</span><span><i class="shared"></i>作品/诗作关系</span></div></section><aside id="detail"><h2>详情</h2><p class="muted">点击人物或作品节点查看详情。</p></aside></main>
+<footer>数据仅使用仓库内派生 CSV，不含原始数据库。别名与多候选匹配需人工复核；共同收录不等于现实关系。来源：MQWW、CBDB。<span id="status"></span></footer>
+<script src="assets/app.js"></script></body></html>
