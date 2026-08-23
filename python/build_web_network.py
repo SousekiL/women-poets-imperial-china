@@ -5,13 +5,13 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 SOURCE = REPO / "data" / "derived" / "network"
 OUT = REPO / "data" / "web-network"
+CHINESE_NUMBERS = ("一", "二", "三", "四", "五", "六", "七", "八", "九", "十")
 
 
 def rows(name: str):
@@ -24,23 +24,6 @@ def write_json(path: Path, value) -> dict:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(payload, encoding="utf-8")
     return {"bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-
-
-def normalized_name(value: str) -> str:
-    """Compare literal personal names without silently folding variants."""
-    return re.sub(r"^(?:明|清|民國|民国)", "", (value or "").strip())
-
-
-def title_authors(title: str) -> list[str]:
-    """Extract literal names immediately preceding 撰 from an MQWW title."""
-    matches = re.findall(r"([\u3400-\u9fff、，,]{1,24})撰", title or "")
-    names = []
-    for match in matches:
-        for name in re.split(r"[、，,]", normalized_name(match)):
-            name = name.removesuffix("等").strip()
-            if 2 <= len(name) <= 8 and name not in names:
-                names.append(name)
-    return names
 
 
 def build(source: Path = SOURCE, out: Path = OUT) -> dict:
@@ -64,11 +47,20 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
         for edge in direct:
             degree[edge["a"]] += 1
             degree[edge["b"]] += 1
+        raw_works = list(rows("work_nodes.csv"))
+        unknown_work_ids = sorted(
+            (r["work_id"] for r in raw_works if not r["title_hz"].strip()),
+            key=lambda work_id: int(work_id),
+        )
+        unknown_titles = {
+            work_id: f"作品名不详{CHINESE_NUMBERS[number - 1]}"
+            for number, work_id in enumerate(unknown_work_ids, start=1)
+        }
         works = [{
-            "id": r["work_id"], "t": r["title_hz"], "p": r["title_py"],
+            "id": r["work_id"], "t": r["title_hz"].strip() or unknown_titles[r["work_id"]], "p": r["title_py"],
             "type": r["worktype"], "juan": r["number_juan"],
             "year": r["pub_year"], "poems": r["n_poems"],
-        } for r in rows("work_nodes.csv")]
+        } for r in raw_works]
         grouped = defaultdict(list)
         layer_counts = Counter()
         total_work_edges = 0
@@ -83,43 +75,19 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
             layer_counts[layer] += 1
             total_work_edges += 1
 
-        people_by_id = {person["id"]: person for person in people}
-        author_index = {}
-        for work in works:
-            resolved = []
-            for title_author in title_authors(work["t"]):
-                candidates = []
-                for edge in grouped.get(work["id"], []):
-                    if edge["role"] not in {"主要作者", "作者"}:
-                        continue
-                    person = people_by_id.get(edge["person"])
-                    if person and title_author in {normalized_name(person["n"]), normalized_name(person["h"])}:
-                        candidates.append(edge["person"])
-                for person_id in sorted(set(candidates)):
-                    if person_id not in resolved:
-                        resolved.append(person_id)
-                        entry = author_index.setdefault(person_id, {
-                            "id": person_id,
-                            "name": people_by_id[person_id]["h"] or people_by_id[person_id]["n"],
-                            "works": [],
-                        })
-                        entry["works"].append(work["id"])
-            work["authors"] = resolved
-
         if out.exists():
             for old in (out / "works").glob("*.json"):
                 old.unlink()
         files = {}
         people_fields = ["id", "c", "m", "n", "h", "f", "l", "q", "s"]
         direct_fields = ["id", "a", "b", "k", "code", "label", "dir", "record", "layer", "q", "rule", "match"]
-        work_fields = ["id", "t", "p", "type", "juan", "year", "poems", "authors"]
+        work_fields = ["id", "t", "p", "type", "juan", "year", "poems"]
         core = {"schema":"web-network-v1", "people_fields":people_fields,
                 "people":[[item[field] for field in people_fields] for item in people],
                 "direct_fields":direct_fields,
                 "direct":[[item[field] for field in direct_fields] for item in direct],
                 "work_fields":work_fields,
                 "works":[[item[field] for field in work_fields] for item in works],
-                "authors": sorted(author_index.values(), key=lambda item: (item["name"], item["id"])),
                 "featured":[node_id for node_id, _ in degree.most_common(600)]}
         files["core.json"] = write_json(out / "core.json", core)
         work_index = {}
