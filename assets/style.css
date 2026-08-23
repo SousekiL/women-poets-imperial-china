@@ -3,3 +3,5 @@
 .controls .label-density{min-width:150px}.controls .label-density input[type=range]{width:150px;min-height:20px;padding:0;accent-color:#62d2c9}.label-density span{font-size:11px;color:#62d2c9;text-align:center}
 
 .graph-tools{position:absolute;left:18px;bottom:66px;display:flex;gap:6px}.graph-tools button{min-width:32px;height:30px;padding:0 9px;color:#eaf3f3;background:#12242bdd;border:1px solid #42606a;border-radius:5px;cursor:pointer}.graph-tools button:last-child{min-width:68px;font-size:12px}.legend i.work-direct{border-radius:2px;background:#fff0a8}.legend i.via-poem{background:#d58aaf}
+
+.detail-network-link{display:block;margin-top:16px;padding:9px 12px;color:#eaf3f3;background:#17353d;border:1px solid #4caaa5;border-radius:5px;cursor:pointer;font:inherit;text-align:left}.detail-network-link:hover{background:#21515a}
