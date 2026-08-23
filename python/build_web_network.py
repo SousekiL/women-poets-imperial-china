@@ -103,8 +103,8 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
                                    "work_direct":sum(e["layer"] == "work_direct" for e in edges),
                                    "work_via_poem":sum(e["layer"] == "work_via_poem" for e in edges)}
         type_index = {}
-        for type_name in sorted({work["type"] for work in works}):
-            type_works = [work["id"] for work in works if work["type"] == type_name]
+        for type_name in ["__all__", *sorted({work["type"] for work in works})]:
+            type_works = [work["id"] for work in works if type_name == "__all__" or work["type"] == type_name]
             compact = defaultdict(list)
             for work_id in type_works:
                 for edge in grouped.get(work_id, []):
@@ -122,10 +122,27 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
                 "works": type_works, "edges": edges,
             })
             type_index[type_name] = {"file": relative, "works": len(type_works), "edges": len(edges)}
+        all_works = [work["id"] for work in works]
+        all_compact = defaultdict(list)
+        for work_id in all_works:
+            for edge in grouped.get(work_id, []):
+                all_compact[(work_id, edge["person"], edge["layer"])].append(edge)
+        all_edges = [{
+            "id": f"all_{work_id}_{person}_{layer}", "work": work_id,
+            "person": person, "layer": layer, "n": len(items),
+            "role": items[0]["role"] if layer == "work_direct" else "",
+            "record": items[0]["record"], "match": items[0]["match"],
+        } for (work_id, person, layer), items in all_compact.items()]
+        all_relative = "types/all.json"
+        files[all_relative] = write_json(out / all_relative, {
+            "schema": "web-network-type-v1", "type": "全部作品",
+            "works": all_works, "edges": all_edges,
+        })
+        all_index = {"file": all_relative, "works": len(all_works), "edges": len(all_edges)}
         manifest = {
             "schema":"web-network-manifest-v1",
             "generated_from":"data/derived/network/*.csv",
-            "core":"core.json", "works":work_index, "types":type_index,
+            "core":"core.json", "works":work_index, "types":type_index, "all":all_index,
             "counts":{"people":len(people), "works":len(works), "direct":len(direct),
                       "kin":sum(e["k"] == "kin" for e in direct),
                       "assoc":sum(e["k"] == "assoc" for e in direct),
