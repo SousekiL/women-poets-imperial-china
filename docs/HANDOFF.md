@@ -254,13 +254,7 @@ data/derived/network/network_nodes.csv
 
 ## 5. 当前工作区与 Git 状态
 
-此前的论文和分析资料已经完整移动到 `backup/legacy-research/`，包括旧根目录文档、R 脚本、`style/`、`output/`、旧 R 数据对象以及 Agent/editor 配置目录。当前仓库存在先前已有的未提交改动，包括：
-
-```text
-（此前旧文件已归档；本次新增文件仍未提交。）
-```
-
-本阶段新增的文档、脚本、派生数据、网站文件和 `backup/legacy-research/` 归档内容尚未提交或推送。提交前必须逐项检查，不要盲目执行 `git add .`。
+此前的论文和分析资料已经完整移动到 `backup/legacy-research/`，包括旧根目录文档、R 脚本、`style/`、`output/`、旧 R 数据对象以及 Agent/editor 配置目录。当前工作区仍存在与 handoff 无关的未提交改动，详见本文件第 6 节。已完成的 handoff 和文章框架文档已经分别提交并推送；提交其他文件前必须逐项检查，不要盲目执行 `git add .`。
 
 仓库是：
 

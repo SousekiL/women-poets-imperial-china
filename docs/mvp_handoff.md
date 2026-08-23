@@ -48,4 +48,5 @@ python3 -m http.server 8877 --directory /Users/sousekilyu/Documents/Github/women
 - 当前为 MVP，Canvas 使用确定性网格坐标，尚未加入 D3 力导向布局或拖拽重排。
 - 页面不会加载 CBDB/MQWW 原始数据库。
 - 1916 年应解释为《德风亭初集》的书目出版/著录信息，不自动等同于创作年份。
-- 未提交、未推送，也未修改原始数据。
+- 本 handoff 文档已提交并推送；未修改原始数据。
+- 其他未提交工作区文件不属于本 handoff 提交。
