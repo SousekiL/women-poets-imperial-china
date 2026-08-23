@@ -34,6 +34,7 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
         people = [{
             "id": r["node_id"], "c": r["cbdb_personid"], "m": r["mqww_poetid"],
             "n": r["name_chn"], "h": r["name_hz"], "f": r["is_female_flagged"],
+            "g": "female" if r["is_female_flagged"] == "1" else ("male" if r["source_layer"] == "cbdb" and r["is_female_flagged"] == "0" else "unknown"),
             "l": r["match_level"], "q": r["confidence"], "s": r["source_layer"],
         } for r in rows("network_nodes.csv")]
         direct = [{
@@ -79,7 +80,7 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
             for old in (out / "works").glob("*.json"):
                 old.unlink()
         files = {}
-        people_fields = ["id", "c", "m", "n", "h", "f", "l", "q", "s"]
+        people_fields = ["id", "c", "m", "n", "h", "f", "g", "l", "q", "s"]
         direct_fields = ["id", "a", "b", "k", "code", "label", "dir", "record", "layer", "q", "rule", "match"]
         work_fields = ["id", "t", "p", "type", "juan", "year", "poems"]
         core = {"schema":"web-network-v1", "people_fields":people_fields,
