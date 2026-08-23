@@ -1,6 +1,6 @@
 # MQWW × CBDB 女性人物与作品关系网络 — Handoff
 
-> 更新时间：2026-08-22
+> 更新时间：2026-08-23
 > 项目目录：`/Users/sousekilyu/Documents/Github/women-poets-imperial-china`
 > 本文用于把当前阶段的研究设计、已完成工作、验证结果和后续任务交给下一次会话/协作者。
 
@@ -270,7 +270,76 @@ https://github.com/SousekiL/women-poets-imperial-china
 
 当前已知为 public，remote 已关联。
 
-## 6. 后续 TODO（按优先级）
+
+## 6. Git 与 iCloud 超时记录
+
+最近已确认成功提交并推送：
+
+```text
+70cb715 docs: refine work type network evidence notes
+```
+
+`main` 与 `origin/main` 当前同步。`docs/wang-zhenyi-wechat-article-outline.md` 已增加别集、合刻、总集三类作品网络的公众号章节、可复算数字和安全图注。
+
+本仓库位于 iCloud 同步目录，之前出现过两类 Git 异常：
+
+1. `.git/index.lock` 导致提交失败；
+2. iCloud 同步 `.git/objects/pack/*.pack` 时发生 `Operation timed out`，一度无法确认提交/推送状态。
+
+后续检查确认文档提交已创建并成功推送。遇到同类问题时：
+
+- 不要强制覆盖 `.git`；
+- 不要删除 `.git/objects/pack`；
+- 不要执行 `git reset --hard`；
+- 等待 iCloud 完成本地化，或将仓库迁移到非 iCloud 目录后再操作；
+- 只有确认没有运行中的 Git 进程时，才处理残留的 `index.lock`。
+
+提交前检查：
+
+```bash
+git status --short --branch
+ls -l .git/index.lock 2>/dev/null || true
+ps aux | grep '[g]it'
+```
+
+当前工作区仍有与本次文档提交无关的未提交修改，包括 `.DS_Store`、部分网络派生数据、`docs/mvp_handoff.md` 和 `python/build_network_derived.py`。这些文件不得在更新 handoff 时一并提交；不要使用 `git add .`。
+
+## 7. 在其他软件中打开项目
+
+如果使用 VS Code、Cursor、Zed 或其他代码编辑器，选择仓库根目录：
+
+```text
+/Users/sousekilyu/Documents/Github/women-poets-imperial-china
+```
+
+截图中的 `New worktree` 不是打开当前项目的必要选项。除非明确需要隔离开发分支，否则选择 `Local`，打开上面的项目根目录，并继续使用 `main` 分支。
+
+不要选择或直接打开：
+
+```text
+.git/
+backup/legacy-research/
+/Users/sousekilyu/Documents/Data/biography_literature_CBDB_china_historical/
+```
+
+原始 CBDB/MQWW 数据目录必须保持本地只读，不能复制到项目或 public GitHub。
+
+只查看线上网站：
+
+```text
+https://sousekil.github.io/women-poets-imperial-china/
+```
+
+本地运行网站：
+
+```bash
+cd /Users/sousekilyu/Documents/Github/women-poets-imperial-china
+python3 -m http.server 8877
+```
+
+然后访问 `http://127.0.0.1:8877/`。继续开发前先阅读 `README.md`、`docs/HANDOFF.md` 和 `docs/data_dictionary.md`；只提交明确属于当前任务的文件。
+
+## 8. 后续 TODO（按优先级）
 
 ### P0：先解决数据与研究质量
 
