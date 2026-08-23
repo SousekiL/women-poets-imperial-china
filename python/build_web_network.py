@@ -62,6 +62,7 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
             "type": r["worktype"], "juan": r["number_juan"],
             "year": r["pub_year"], "poems": r["n_poems"],
         } for r in raw_works]
+        work_by_id = {work["id"]: work for work in works}
         grouped = defaultdict(list)
         layer_counts = Counter()
         total_work_edges = 0
@@ -77,8 +78,9 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
             total_work_edges += 1
 
         if out.exists():
-            for old in (out / "works").glob("*.json"):
-                old.unlink()
+            for directory in ("works", "types"):
+                for old in (out / directory).glob("*.json"):
+                    old.unlink()
         files = {}
         people_fields = ["id", "c", "m", "n", "h", "f", "g", "l", "q", "s"]
         direct_fields = ["id", "a", "b", "k", "code", "label", "dir", "record", "layer", "q", "rule", "match"]
@@ -100,10 +102,30 @@ def build(source: Path = SOURCE, out: Path = OUT) -> dict:
             work_index[work_id] = {"file":relative, "edges":len(edges),
                                    "work_direct":sum(e["layer"] == "work_direct" for e in edges),
                                    "work_via_poem":sum(e["layer"] == "work_via_poem" for e in edges)}
+        type_index = {}
+        for type_name in sorted({work["type"] for work in works}):
+            type_works = [work["id"] for work in works if work["type"] == type_name]
+            compact = defaultdict(list)
+            for work_id in type_works:
+                for edge in grouped.get(work_id, []):
+                    compact[(work_id, edge["person"], edge["layer"])].append(edge)
+            edges = [{
+                "id": f"type_{work_id}_{person}_{layer}", "work": work_id,
+                "person": person, "layer": layer, "n": len(items),
+                "role": items[0]["role"] if layer == "work_direct" else "",
+                "record": items[0]["record"], "match": items[0]["match"],
+            } for (work_id, person, layer), items in compact.items()]
+            token = hashlib.sha256(type_name.encode("utf-8")).hexdigest()[:12]
+            relative = f"types/{token}.json"
+            files[relative] = write_json(out / relative, {
+                "schema": "web-network-type-v1", "type": type_name,
+                "works": type_works, "edges": edges,
+            })
+            type_index[type_name] = {"file": relative, "works": len(type_works), "edges": len(edges)}
         manifest = {
             "schema":"web-network-manifest-v1",
             "generated_from":"data/derived/network/*.csv",
-            "core":"core.json", "works":work_index,
+            "core":"core.json", "works":work_index, "types":type_index,
             "counts":{"people":len(people), "works":len(works), "direct":len(direct),
                       "kin":sum(e["k"] == "kin" for e in direct),
                       "assoc":sum(e["k"] == "assoc" for e in direct),
