@@ -302,7 +302,7 @@ ls -l .git/index.lock 2>/dev/null || true
 ps aux | grep '[g]it'
 ```
 
-当前工作区仍有与本次文档提交无关的未提交修改，包括 `.DS_Store`、部分网络派生数据、`docs/mvp_handoff.md` 和 `python/build_network_derived.py`。这些文件不得在更新 handoff 时一并提交；不要使用 `git add .`。
+当前工作区仍有与本次文档提交无关的未提交修改，包括 `.DS_Store`、部分网络派生数据、`python/build_network_derived.py`。`docs/mvp_handoff.md` 已在本次 handoff 文档提交中纳入；其余文件不得在更新 handoff 时一并提交，不要使用 `git add .`。
 
 ## 7. 在其他软件中打开项目
 
